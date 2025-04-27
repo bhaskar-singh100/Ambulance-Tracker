@@ -170,7 +170,7 @@ export default function Booking() {
   };
 
   useEffect(() => {
-    const url = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAsvRqj6OdubkF9917Kk236prfI35kZqBo&libraries=places`;
+    const url = process.env.NEXT_PUBLIC_API_KEY_URL;
 
     loadScript(url)
       .then(() => initMap())
