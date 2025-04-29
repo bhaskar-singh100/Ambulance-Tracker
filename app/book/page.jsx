@@ -17,6 +17,9 @@ export default function Booking() {
   const [endLoc, setEndLoc] = useState("");
   const [bookingType, setBookingType] = useState("emergency");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [fare, setFare] = useState("");
+  const [driverInfo, setDriverInfo] = useState(null);
+  const [driverMarker, setDriverMarker] = useState(null);
 
   const navItems = [
     { name: "Services", href: "/services" },
@@ -53,7 +56,10 @@ export default function Booking() {
   };
 
   const initMap = () => {
-    if (!window.google || !mapRef.current) return;
+    if (!window.google || !mapRef.current) {
+      console.error("Google Maps or mapRef not available");
+      return;
+    }
 
     const map = new window.google.maps.Map(mapRef.current, {
       zoom: 12,
@@ -73,22 +79,22 @@ export default function Booking() {
       dropRef.current
     );
 
-    pickupAutocomplete.setFields(["formatted_address"]);
+    pickupAutocomplete.setFields(["formatted_address", "geometry"]);
     dropAutocomplete.setFields(["formatted_address"]);
 
     pickupAutocomplete.addListener("place_changed", () => {
       const place = pickupAutocomplete.getPlace();
       if (place && place.formatted_address) {
+        console.log("Pickup location set:", place.formatted_address);
         setStartLoc(place.formatted_address);
-        setTimeout(calculateRoute, 200);
       }
     });
 
     dropAutocomplete.addListener("place_changed", () => {
       const place = dropAutocomplete.getPlace();
       if (place && place.formatted_address) {
+        console.log("Drop-off location set:", place.formatted_address);
         setEndLoc(place.formatted_address);
-        setTimeout(calculateRoute, 200);
       }
     });
 
@@ -96,22 +102,40 @@ export default function Booking() {
   };
 
   const calculateRoute = () => {
-    const mode = document.getElementById("mode").value;
-    if (!mapData || !startLoc || !endLoc) return;
+    if (!mapData || !mapData.directionsService || !startLoc || !endLoc) {
+      console.log("Cannot calculate route:", {
+        mapData: !!mapData,
+        directionsService: !!(mapData && mapData.directionsService),
+        startLoc,
+        endLoc,
+      });
+      toast.error("Route calculation failed: Missing map data or locations");
+      return;
+    }
 
+    console.log("Calculating route from", startLoc, "to", endLoc);
     mapData.directionsService
       .route({
         origin: startLoc,
         destination: endLoc,
-        travelMode: window.google.maps.TravelMode[mode],
+        travelMode: window.google.maps.TravelMode.DRIVING,
       })
       .then((response) => {
+        console.log("Route calculation successful:", response);
         mapData.directionsRenderer.setDirections(response);
         const leg = response.routes[0].legs[0];
         setDistance(leg.distance.text);
         setDuration(leg.duration.text);
+        const distanceKm =
+          parseFloat(leg.distance.text.replace(" km", "")) || 0;
+        const fare =
+          bookingType === "emergency"
+            ? (5 + distanceKm * 2).toFixed(2)
+            : (3 + distanceKm * 1.5).toFixed(2);
+        setFare(fare);
       })
       .catch((error) => {
+        console.error("Route request failed:", error);
         toast.error("Route request failed: " + error.message);
       });
   };
@@ -131,9 +155,9 @@ export default function Booking() {
         geocoder.geocode({ location: latlng }, (results, status) => {
           if (status === "OK" && results[0]) {
             const address = results[0].formatted_address;
+            console.log("Current location address:", address);
             setStartLoc(address);
             pickupRef.current.value = address;
-            setTimeout(calculateRoute, 200);
             toast.success("Current location set as pickup");
           } else {
             toast.error("Unable to retrieve address for current location");
@@ -156,25 +180,77 @@ export default function Booking() {
       toast.error("Please enter both pickup and drop-off locations");
       return;
     }
-    toast.success(
-      `${
-        bookingType === "emergency" ? "Emergency" : "Non-Emergency"
-      } booking confirmed!`
-    );
+    if (!distance || !duration) {
+      toast.error("Please wait for route calculation to complete");
+      return;
+    }
+
+    const drivers = ["John Smith", "Emma Wilson", "Michael Brown"];
+    const driverName = drivers[Math.floor(Math.random() * drivers.length)];
+
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ address: startLoc }, (results, status) => {
+      if (status === "OK" && results[0]) {
+        const pickupLatLng = results[0].geometry.location;
+        const driverLat = pickupLatLng.lat() + (Math.random() - 0.5) * 0.01;
+        const driverLng = pickupLatLng.lng() + (Math.random() - 0.5) * 0.01;
+
+        if (mapData && mapData.map) {
+          if (driverMarker) driverMarker.setMap(null);
+          const newMarker = new window.google.maps.Marker({
+            position: { lat: driverLat, lng: driverLng },
+            map: mapData.map,
+            title: driverName,
+            icon: {
+              url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+            },
+          });
+          setDriverMarker(newMarker);
+        }
+
+        setDriverInfo({
+          name: driverName,
+          coordinates: { lat: driverLat.toFixed(4), lng: driverLng.toFixed(4) },
+        });
+        toast.success(
+          `${driverName} accepted your request, he will be coming soon!`
+        );
+      } else {
+        toast.error("Unable to assign driver location");
+      }
+    });
+
     setStartLoc("");
     setEndLoc("");
     setDistance("");
     setDuration("");
+    setFare("");
     pickupRef.current.value = "";
     dropRef.current.value = "";
   };
 
+  // Trigger route calculation when both startLoc and endLoc are set
   useEffect(() => {
-    const url = process.env.NEXT_PUBLIC_API_KEY_URL;
+    if (startLoc && endLoc && mapData) {
+      console.log("useEffect triggering route calculation");
+      const timeout = setTimeout(calculateRoute, 500); // Debounce to ensure API readiness
+      return () => clearTimeout(timeout);
+    }
+  }, [startLoc, endLoc, mapData]);
+
+  useEffect(() => {
+    const url = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAsvRqj6OdubkF9917Kk236prfI35kZqBo&libraries=places`;
 
     loadScript(url)
-      .then(() => initMap())
+      .then(() => {
+        console.log("Google Maps script loaded");
+        initMap();
+      })
       .catch((err) => console.error("Google Maps load error:", err));
+
+    return () => {
+      if (driverMarker) driverMarker.setMap(null);
+    };
   }, []);
 
   return (
@@ -348,7 +424,7 @@ export default function Booking() {
                   id="pickup"
                   ref={pickupRef}
                   placeholder="Enter pickup location"
-                  className="flex-grow px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-600"
+                  className="flex-grow px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
                 />
                 <motion.button
                   type="button"
@@ -374,17 +450,19 @@ export default function Booking() {
                 id="drop"
                 ref={dropRef}
                 placeholder="Enter drop-off location"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-600"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
               />
             </div>
-
-            {distance && duration && (
+            {distance && duration && fare && (
               <div className="mb-6">
                 <p className="text-gray-700">
                   <strong>Distance:</strong> {distance}
                 </p>
                 <p className="text-gray-700">
                   <strong>Duration:</strong> {duration}
+                </p>
+                <p className="text-gray-700">
+                  <strong>Fare:</strong> ${fare}
                 </p>
               </div>
             )}
@@ -401,6 +479,25 @@ export default function Booking() {
               </button>
             </motion.div>
           </form>
+          {driverInfo && (
+            <motion.div
+              className="mt-6 p-4 bg-gray-100 rounded-lg"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h3 className="text-lg font-semibold text-gray-800">
+                Booking Confirmed
+              </h3>
+              <p className="text-gray-700">
+                {driverInfo.name} accepted your request, he will be coming soon.
+              </p>
+              <p className="text-gray-700">
+                <strong>Driver Location:</strong> Lat:{" "}
+                {driverInfo.coordinates.lat}, Lng: {driverInfo.coordinates.lng}
+              </p>
+            </motion.div>
+          )}
         </div>
 
         {/* Map and Directions Sidebar */}

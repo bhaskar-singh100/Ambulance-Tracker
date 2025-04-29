@@ -9,7 +9,8 @@ export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState("customer");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [gender, setGender] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const containerVariants = {
@@ -28,7 +29,7 @@ export default function Signup() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name || !email || !password || !userType) {
+    if (!name || !email || !password || !phoneNumber) {
       toast.error("Please fill in all fields");
       return;
     }
@@ -45,7 +46,8 @@ export default function Signup() {
     setName("");
     setEmail("");
     setPassword("");
-    setUserType("customer");
+    setPhoneNumber("");
+    setGender("");
   };
 
   return (
@@ -87,7 +89,7 @@ export default function Signup() {
       >
         <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
           <h2 className="text-3xl font-bold text-gray-800 text-center mb-6">
-            Create Your Account
+            Create Your Account for Customer
           </h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
@@ -102,7 +104,7 @@ export default function Signup() {
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-700"
                 placeholder="Enter your full name"
               />
             </div>
@@ -118,7 +120,7 @@ export default function Signup() {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-700"
                 placeholder="Enter your email"
               />
             </div>
@@ -134,7 +136,7 @@ export default function Signup() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-700"
                 placeholder="Enter your password"
               />
               <button
@@ -145,23 +147,42 @@ export default function Signup() {
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
-            <div className="mb-6">
+            <div className="mb-4">
               <label
-                htmlFor="userType"
+                htmlFor="phone"
                 className="block text-gray-700 font-semibold mb-2"
               >
-                User Type
+                Phone Number
+              </label>
+              <input
+                type="text"
+                id="phone"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-700"
+                placeholder="Enter your phone number"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="gender"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                Gender
               </label>
               <select
-                id="userType"
-                value={userType}
-                onChange={(e) => setUserType(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                id="gender"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-700"
               >
-                <option value="customer">Customer</option>
-                <option value="driver">Driver</option>
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
               </select>
             </div>
+
             <motion.div
               variants={buttonVariants}
               whileHover="hover"
