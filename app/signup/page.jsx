@@ -4,6 +4,9 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import usePostQuery from "@/hooks/postQuery.hook";
+import { apiUrls } from "@/apis/urls";
+import { useRouter } from "next/navigation";
 
 export default function Signup() {
   const [name, setName] = useState("");
@@ -12,6 +15,8 @@ export default function Signup() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [gender, setGender] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const { postQuery } = usePostQuery();
+  const router = useRouter();
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -27,7 +32,7 @@ export default function Signup() {
     tap: { scale: 0.95 },
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !email || !password || !phoneNumber) {
       toast.error("Please fill in all fields");
@@ -41,13 +46,36 @@ export default function Signup() {
       toast.error("Password must be at least 6 characters");
       return;
     }
+    if (phoneNumber.length < 10 || phoneNumber.length > 10) {
+      toast.error("Phone number must be at 10 digits");
+      return;
+    }
     // Simulate signup API call
-    toast.success("Account created successfully!");
-    setName("");
-    setEmail("");
-    setPassword("");
-    setPhoneNumber("");
-    setGender("");
+    await postQuery({
+      url: apiUrls.customerSignup,
+      postData: {
+        name,
+        email,
+        password,
+        phoneNumber,
+        gender,
+      },
+      onSuccess: (data) => {
+        //console.log(data.success, "true postQuery-success");
+        if (data && data.success) {
+          toast.success("Account created successfully!");
+          setName("");
+          setEmail("");
+          setPassword("");
+          setPhoneNumber("");
+          setGender("");
+        }
+        router.push("/login");
+      },
+      onFail: (error) => {
+        toast.error(error || "Something went wrong!");
+      },
+    });
   };
 
   return (

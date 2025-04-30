@@ -4,16 +4,23 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import usePostQuery from "@/hooks/postQuery.hook";
+import { apiUrls } from "@/apis/urls";
+import { useRouter } from "next/navigation";
 
 export default function DriverRegister() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { postQuery } = usePostQuery();
+  const router = useRouter();
   const [driverForm, setDriverForm] = useState({
     name: "",
     email: "",
-    phone: "",
-    licenseNumber: "",
+    phoneNumber: "",
+    password: "",
+    gender: "",
+    dlNumber: "",
     vehicleType: "",
-    vehicleRegistration: "",
+    vehicleNumber: "",
   });
 
   const navItems = [
@@ -35,15 +42,17 @@ export default function DriverRegister() {
     tap: { scale: 0.95 },
   };
 
-  const handleDriverFormSubmit = (e) => {
+  const handleDriverFormSubmit = async (e) => {
     e.preventDefault();
     if (
       !driverForm.name ||
       !driverForm.email ||
-      !driverForm.phone ||
-      !driverForm.licenseNumber ||
+      !driverForm.phoneNumber ||
+      !driverForm.password ||
+      !driverForm.gender ||
+      !driverForm.dlNumber ||
       !driverForm.vehicleType ||
-      !driverForm.vehicleRegistration
+      !driverForm.vehicleNumber
     ) {
       toast.error("Please fill in all fields");
       return;
@@ -52,20 +61,36 @@ export default function DriverRegister() {
       toast.error("Please enter a valid email");
       return;
     }
-    if (!/^\d{10}$/.test(driverForm.phone)) {
+    if (!/^\d{10}$/.test(driverForm.phoneNumber)) {
       toast.error("Please enter a valid 10-digit phone number");
       return;
     }
-
-    // Simulate submission to backend
-    toast.success("Your application is pending. Admin will update you soon.");
-    setDriverForm({
-      name: "",
-      email: "",
-      phone: "",
-      licenseNumber: "",
-      vehicleType: "",
-      vehicleRegistration: "",
+    if (driverForm.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    await postQuery({
+      url: apiUrls.driverSignup,
+      postData: driverForm,
+      onSuccess: (data) => {
+        toast.success("Driver registration successful!");
+        setDriverForm({
+          name: "",
+          email: "",
+          phoneNumber: "",
+          password: "",
+          gender: "",
+          dlNumber: "",
+          vehicleType: "",
+          vehicleNumber: "",
+        });
+        router.push("/login");
+        //console.log(data, "driver-register-success");
+      },
+      onFail: (error) => {
+        toast.error("Driver registration failed. Please try again.");
+        //console.log(error, "driver-register-fail");
+      },
     });
   };
 
@@ -238,33 +263,72 @@ export default function DriverRegister() {
             </div>
             <div className="mb-4">
               <label
-                htmlFor="phone"
+                htmlFor="phoneNumber"
                 className="block text-gray-700 font-semibold mb-2"
               >
                 Phone Number
               </label>
               <input
                 type="text"
-                id="phone"
-                name="phone"
-                value={driverForm.phone}
+                id="phoneNumber"
+                name="phoneNumber"
+                value={driverForm.phoneNumber}
                 onChange={handleDriverFormChange}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
                 placeholder="Enter your phone number"
               />
             </div>
+            {/* Add this after phone number field */}
+            <div className="mb-4 relative">
+              <label
+                htmlFor="password"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={driverForm.password}
+                onChange={handleDriverFormChange}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
+                placeholder="Enter your password"
+              />
+            </div>
+
             <div className="mb-4">
               <label
-                htmlFor="licenseNumber"
+                htmlFor="gender"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                Gender
+              </label>
+              <select
+                id="gender"
+                name="gender"
+                value={driverForm.gender}
+                onChange={handleDriverFormChange}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
+              >
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="dlNumber"
                 className="block text-gray-700 font-semibold mb-2"
               >
                 Driver License Number
               </label>
               <input
                 type="text"
-                id="licenseNumber"
-                name="licenseNumber"
-                value={driverForm.licenseNumber}
+                id="dlNumber"
+                name="dlNumber"
+                value={driverForm.dlNumber}
                 onChange={handleDriverFormChange}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
                 placeholder="Enter your license number"
@@ -294,16 +358,16 @@ export default function DriverRegister() {
             </div>
             <div className="mb-6">
               <label
-                htmlFor="vehicleRegistration"
+                htmlFor="vehicleNumber"
                 className="block text-gray-700 font-semibold mb-2"
               >
                 Vehicle Registration Number
               </label>
               <input
                 type="text"
-                id="vehicleRegistration"
-                name="vehicleRegistration"
-                value={driverForm.vehicleRegistration}
+                id="vehicleNumber"
+                name="vehicleNumber"
+                value={driverForm.vehicleNumber}
                 onChange={handleDriverFormChange}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
                 placeholder="Enter vehicle registration number"
@@ -331,7 +395,6 @@ export default function DriverRegister() {
         </div>
       </motion.section>
 
-      
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );

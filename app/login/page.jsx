@@ -4,11 +4,17 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import usePostQuery from "@/hooks/postQuery.hook";
+import { apiUrls } from "@/apis/urls";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("customer");
   const [showPassword, setShowPassword] = useState(false);
+  const { postQuery } = usePostQuery();
+  const router = useRouter();
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -24,7 +30,7 @@ export default function Login() {
     tap: { scale: 0.95 },
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error("Please fill in all fields");
@@ -35,9 +41,24 @@ export default function Login() {
       return;
     }
     // Simulate login API call
-    toast.success("Login successful!");
-    setEmail("");
-    setPassword("");
+    const loginUrl =
+      role === "customer" ? apiUrls.customerLogin : apiUrls.driverLogin;
+    await postQuery({
+      url: loginUrl,
+      postData: { email, password },
+      onSuccess: (data) => {
+        toast.success("Login successful!");
+        router.push("/");
+        //console.log(data, "login-success");
+      },
+      onFail: (error) => {
+        toast.error("Login failed. Please try again.");
+        //console.log(error, "login-fail");
+      },
+    });
+
+    // setEmail("");
+    // setPassword("");
   };
 
   return (
@@ -82,6 +103,23 @@ export default function Login() {
             Login to Your Account
           </h2>
           <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label
+                htmlFor="role"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                Login As
+              </label>
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              >
+                <option value="customer">Customer</option>
+                <option value="driver">Driver</option>
+              </select>
+            </div>
             <div className="mb-4">
               <label
                 htmlFor="email"
