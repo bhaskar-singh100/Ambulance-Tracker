@@ -1,13 +1,32 @@
 "use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { apiUrls } from "@/apis/urls";
+import usePutQuery from "@/hooks/putQuery.hook";
+import { jwtDecode } from "jwt-decode";
 
 export default function DriverDuty() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isOnDuty, setIsOnDuty] = useState(false);
+  const { putQuery } = usePutQuery();
+
+  const token = sessionStorage.getItem("access_token");
+  const [id, setId] = useState();
+  useEffect(() => {
+    const token = sessionStorage.getItem("access_token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        console.log(decoded, "decoded-tokenn");
+        setId(decoded._id);
+      } catch (err) {
+        console.error("Invalid token:", err);
+      }
+    }
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -23,15 +42,24 @@ export default function DriverDuty() {
     tap: { scale: 0.95 },
   };
 
-  const handleDutyToggle = () => {
+  const handleDutyToggle = async () => {
+    await putQuery({
+      url: apiUrls.toggleDuty,
+      putData: { id },
+      onSuccess: (data) => {
+        console.log("Duty status updated successfully", data);
+        toast.success(`Duty status updated to ${!isOnDuty ? "On" : "Off"}`);
+      },
+      onFail: (error) => {
+        console.error("Failed to update duty status", error);
+        toast.error("Failed to update duty status. Please try again.");
+      },
+    });
     setIsOnDuty(!isOnDuty);
-    toast.success(`Duty status updated to ${!isOnDuty ? "On" : "Off"}`);
   };
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-      {/* Navbar */}
-
       {/* Duty Toggle Section */}
       <motion.section
         className="pt-24 pb-16 flex items-center justify-center"
@@ -61,6 +89,19 @@ export default function DriverDuty() {
           <p className="text-gray-600 text-center">
             Toggle your duty status to start or stop receiving booking requests.
           </p>
+          {isOnDuty && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200"
+            >
+              <p className="text-blue-700 text-center font-medium">
+                You are now on duty! You will receive service requests soon.
+                Stay tuned for incoming bookings.
+              </p>
+            </motion.div>
+          )}
         </div>
       </motion.section>
 
