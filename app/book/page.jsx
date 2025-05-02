@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import useAuthCheck from "@/hooks/useAuthCheck";
 
 export default function Booking() {
   const mapRef = useRef(null);
@@ -20,6 +21,7 @@ export default function Booking() {
   const [fare, setFare] = useState("");
   const [driverInfo, setDriverInfo] = useState(null);
   const [driverMarker, setDriverMarker] = useState(null);
+  const { isLoggedIn, userName } = useAuthCheck();
 
   const navItems = [
     { name: "Services", href: "/services" },
@@ -36,7 +38,7 @@ export default function Booking() {
   };
 
   const buttonVariants = {
-    hover: { scale: 1.05, boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)" },
+    hover: { scale: 1.05 },
     tap: { scale: 0.95 },
   };
 
@@ -255,120 +257,6 @@ export default function Booking() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-      {/* Navbar */}
-      <nav className="bg-white shadow-lg fixed w-full z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center">
-                <img
-                  src="/ambulance-logo.png"
-                  alt="Ambulance Tracker"
-                  className="h-10 w-10"
-                />
-                <span className="ml-2 text-xl font-bold text-blue-600">
-                  Ambulance Tracker
-                </span>
-              </Link>
-            </div>
-            <div className="hidden md:flex items-center space-x-8">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="text-gray-700 hover:text-blue-600 transition duration-300"
-                >
-                  {item.name}
-                </Link>
-              ))}
-              <motion.div
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <Link
-                  href="/book"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300"
-                >
-                  Book Now
-                </Link>
-              </motion.div>
-              <motion.div
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <Link
-                  href="/login"
-                  className="border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
-                >
-                  Login
-                </Link>
-              </motion.div>
-            </div>
-            <div className="md:hidden flex items-center">
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-gray-700 focus:outline-none"
-              >
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d={
-                      isMenuOpen
-                        ? "M6 18L18 6M6 6l12 12"
-                        : "M4 6h16M4 12h16M4 18h16"
-                    }
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-        {isMenuOpen && (
-          <motion.div
-            className="md:hidden bg-white shadow-lg"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="px-4 pt-2 pb-4 space-y-2">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="block text-gray-700 hover:text-blue-600 transition duration-300"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-              <Link
-                href="/book"
-                className="block bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Book Now
-              </Link>
-              <Link
-                href="/login"
-                className="block border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Login
-              </Link>
-            </div>
-          </motion.div>
-        )}
-      </nav>
-
       {/* Booking Form and Map */}
       <motion.section
         className="pt-24 pb-16 flex flex-col lg:flex-row"
@@ -510,53 +398,6 @@ export default function Booking() {
         </div>
       </motion.section>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Ambulance Tracker</h3>
-              <p className="text-gray-400">
-                Connecting you to emergency services, anytime, anywhere.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-              <ul className="space-y-2">
-                {navItems.map((item) => (
-                  <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      className="text-gray-400 hover:text-white transition duration-300"
-                    >
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
-                <li>
-                  <Link
-                    href="/contact"
-                    className="text-gray-400 hover:text-white transition duration-300"
-                  >
-                    Contact
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
-              <p className="text-gray-400">
-                Email: support@ambulancetracker.com
-                <br />
-                Phone: +1-800-123-4567
-              </p>
-            </div>
-          </div>
-          <div className="mt-8 text-center text-gray-400">
-            © 2025 Ambulance Tracker. All rights reserved.
-          </div>
-        </div>
-      </footer>
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );

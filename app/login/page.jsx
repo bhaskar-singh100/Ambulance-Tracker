@@ -4,11 +4,17 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import usePostQuery from "@/hooks/postQuery.hook";
+import { apiUrls } from "@/apis/urls";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("customer");
   const [showPassword, setShowPassword] = useState(false);
+  const { postQuery } = usePostQuery();
+  const router = useRouter();
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -20,11 +26,11 @@ export default function Login() {
   };
 
   const buttonVariants = {
-    hover: { scale: 1.05, boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)" },
+    hover: { scale: 1.05 },
     tap: { scale: 0.95 },
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error("Please fill in all fields");
@@ -35,41 +41,31 @@ export default function Login() {
       return;
     }
     // Simulate login API call
-    toast.success("Login successful!");
-    setEmail("");
-    setPassword("");
+    const loginUrl =
+      role === "customer" ? apiUrls.customerLogin : apiUrls.driverLogin;
+    await postQuery({
+      url: loginUrl,
+      postData: { email, password },
+      onSuccess: (data) => {
+        toast.success("Login successful!");
+        sessionStorage.setItem("access_token", data.token);
+        router.push("/");
+        //window.location.reload();
+
+        //console.log(data, "login-success");
+      },
+      onFail: (error) => {
+        toast.error("Login failed. Please try again.");
+        //console.log(error, "login-fail");
+      },
+    });
+
+    // setEmail("");
+    // setPassword("");
   };
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-      {/* Navbar */}
-      <nav className="bg-white shadow-lg fixed w-full z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center">
-                <img
-                  src="/ambulance-logo.png"
-                  alt="Ambulance Tracker"
-                  className="h-10 w-10"
-                />
-                <span className="ml-2 text-xl font-bold text-blue-600">
-                  Ambulance Tracker
-                </span>
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/signup"
-                className="text-gray-700 hover:text-blue-600 transition duration-300"
-              >
-                Sign Up
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       {/* Login Form */}
       <motion.section
         className="pt-24 pb-16 flex items-center justify-center"
@@ -84,6 +80,23 @@ export default function Login() {
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label
+                htmlFor="role"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                Login As
+              </label>
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-700"
+              >
+                <option value="customer">Customer</option>
+                <option value="driver">Driver</option>
+              </select>
+            </div>
+            <div className="mb-4">
+              <label
                 htmlFor="email"
                 className="block text-gray-700 font-semibold mb-2"
               >
@@ -94,7 +107,7 @@ export default function Login() {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-700"
                 placeholder="Enter your email"
               />
             </div>
@@ -110,7 +123,7 @@ export default function Login() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-700"
                 placeholder="Enter your password"
               />
               <button

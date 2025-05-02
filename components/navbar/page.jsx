@@ -1,11 +1,15 @@
 "use client";
 import Link from "next/link";
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
+import useAuthCheck from "@/hooks/useAuthCheck";
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isLoggedIn, userName } = useAuthCheck({
+    redirectOnUnauthenticated: false,
+  });
 
   const navItems = [
     { name: "Services", href: "/services" },
@@ -22,13 +26,30 @@ function Navbar() {
   };
 
   const buttonVariants = {
-    hover: { scale: 1.05, boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)" },
+    hover: { scale: 1.05 },
     tap: { scale: 0.95 },
   };
 
-  const cardVariants = {
-    hover: { y: -10, boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.15)" },
+  const modalVariants = {
+    hidden: { opacity: 0, y: -10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.2 } },
   };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("access_token");
+    setIsMenuOpen(false);
+    setIsModalOpen(false);
+    window.location.href = "/login";
+  };
+
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div>
       <nav className="bg-white shadow-lg fixed w-full z-10">
@@ -68,18 +89,60 @@ function Navbar() {
                   Book Now
                 </Link>
               </motion.div>
-              <motion.div
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <Link
-                  href="/login"
-                  className="border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
+              {isLoggedIn ? (
+                <div className="relative flex items-center">
+                  <div
+                    className="flex items-center cursor-pointer"
+                    onClick={toggleModal}
+                  >
+                    <img
+                      src="https://placehold.co/32x32"
+                      alt="Profile"
+                      className="h-8 w-8 rounded-full mr-2"
+                    />
+                    <span className="text-gray-700 font-medium">
+                      {userName || "User"}
+                    </span>
+                  </div>
+                  {isModalOpen && (
+                    <motion.div
+                      className="absolute top-full left-0 mt-2 w-48 bg-white shadow-lg rounded-md z-20"
+                      variants={modalVariants}
+                      initial="hidden"
+                      animate="visible"
+                    >
+                      <div className="py-2">
+                        <Link
+                          href="/profile"
+                          className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-300"
+                          onClick={closeModal}
+                        >
+                          Profile
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition duration-300"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              ) : (
+                <motion.div
+                  variants={buttonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
                 >
-                  Login
-                </Link>
-              </motion.div>
+                  <Link
+                    href="/login"
+                    className="border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
+                  >
+                    Login
+                  </Link>
+                </motion.div>
+              )}
             </div>
             <div className="md:hidden flex items-center">
               <button
@@ -132,13 +195,31 @@ function Navbar() {
               >
                 Book Now
               </Link>
-              <Link
-                href="/login"
-                className="block border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Login
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <Link
+                    href="/profile"
+                    className="block border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {userName ? `${userName}'s Profile` : "Profile"}
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="block border border-red-600 text-red-600 px-4 py-2 rounded-full hover:bg-red-50 transition duration-300 w-full text-left"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  className="block border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Login
+                </Link>
+              )}
             </div>
           </motion.div>
         )}

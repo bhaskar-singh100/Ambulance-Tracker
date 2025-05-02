@@ -4,6 +4,9 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import usePostQuery from "@/hooks/postQuery.hook";
+import { apiUrls } from "@/apis/urls";
+import { useRouter } from "next/navigation";
 
 export default function Signup() {
   const [name, setName] = useState("");
@@ -12,6 +15,8 @@ export default function Signup() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [gender, setGender] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const { postQuery } = usePostQuery();
+  const router = useRouter();
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -23,11 +28,11 @@ export default function Signup() {
   };
 
   const buttonVariants = {
-    hover: { scale: 1.05, boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)" },
+    hover: { scale: 1.05 },
     tap: { scale: 0.95 },
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !email || !password || !phoneNumber) {
       toast.error("Please fill in all fields");
@@ -41,44 +46,41 @@ export default function Signup() {
       toast.error("Password must be at least 6 characters");
       return;
     }
+    if (phoneNumber.length < 10 || phoneNumber.length > 10) {
+      toast.error("Phone number must be at 10 digits");
+      return;
+    }
     // Simulate signup API call
-    toast.success("Account created successfully!");
-    setName("");
-    setEmail("");
-    setPassword("");
-    setPhoneNumber("");
-    setGender("");
+    await postQuery({
+      url: apiUrls.customerSignup,
+      postData: {
+        name,
+        email,
+        password,
+        phoneNumber,
+        gender,
+      },
+      onSuccess: (data) => {
+        //console.log(data.success, "true postQuery-success");
+        if (data && data.success) {
+          toast.success("Account created successfully!");
+          setName("");
+          setEmail("");
+          setPassword("");
+          setPhoneNumber("");
+          setGender("");
+        }
+        router.push("/login");
+      },
+      onFail: (error) => {
+        toast.error(error || "Something went wrong!");
+      },
+    });
   };
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
       {/* Navbar */}
-      <nav className="bg-white shadow-lg fixed w-full z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center">
-                <img
-                  src="/ambulance-logo.png"
-                  alt="Ambulance Tracker"
-                  className="h-10 w-10"
-                />
-                <span className="ml-2 text-xl font-bold text-blue-600">
-                  Ambulance Tracker
-                </span>
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/login"
-                className="text-gray-700 hover:text-blue-600 transition duration-300"
-              >
-                Login
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
 
       {/* Signup Form */}
       <motion.section
