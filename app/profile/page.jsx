@@ -3,11 +3,19 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import useAuthCheck from "@/hooks/useAuthCheck";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "react-toastify";
 
 export default function Profile() {
-  const { isLoggedIn, userName } = useAuthCheck();
   const router = useRouter();
+  const { isLoggedIn, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !isLoggedIn) {
+      toast.error("Please login to book an ambulance");
+      router.push("/login");
+    }
+  }, [isLoggedIn, loading, router]);
 
   // useEffect(() => {
   //   if (!isLoggedIn) {
