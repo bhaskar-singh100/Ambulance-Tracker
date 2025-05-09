@@ -54,7 +54,7 @@ function About() {
               >
                 <Link
                   href="/about"
-                  className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-300"
+                  className="bg-[#df4040] text-white px-6 py-3 rounded-full hover:bg-[#df4040] transition duration-300"
                 >
                   Learn More
                 </Link>

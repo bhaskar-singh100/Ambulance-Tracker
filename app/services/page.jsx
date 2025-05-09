@@ -1,8 +1,21 @@
 "use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 export default function Services() {
+  const { isLoggedIn, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !isLoggedIn) {
+      toast.error("Please login to book an ambulance");
+      router.push("/login");
+    }
+  }, [isLoggedIn, loading, router]);
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -25,7 +38,7 @@ export default function Services() {
     <div className="min-h-screen bg-gray-50 font-sans">
       {/* Hero Section */}
       <motion.section
-        className="pt-24 pb-12 bg-gradient-to-r from-blue-500 to-blue-700 text-white text-center"
+        className="pt-24 pb-12 bg-gradient-to-r from-[#df4040] to-[#df4040] text-white text-center"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -43,7 +56,7 @@ export default function Services() {
           >
             <Link
               href="/book"
-              className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
+              className="bg-white text-[#df4040] px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
             >
               Book an Ambulance Now
             </Link>
@@ -70,7 +83,7 @@ export default function Services() {
               variants={cardVariants}
               whileHover="hover"
             >
-              <h3 className="text-xl font-semibold text-blue-600 mb-4">
+              <h3 className="text-xl font-semibold text-[#df4040] mb-4">
                 Book an Ambulance
               </h3>
               <p className="text-gray-600 mb-6">
@@ -85,7 +98,7 @@ export default function Services() {
               >
                 <Link
                   href="/book"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300"
+                  className="bg-[#df4040] text-white px-4 py-2 rounded-full hover:bg-[#df4040] transition duration-300"
                 >
                   Book Now
                 </Link>
@@ -98,7 +111,7 @@ export default function Services() {
               variants={cardVariants}
               whileHover="hover"
             >
-              <h3 className="text-xl font-semibold text-blue-600 mb-4">
+              <h3 className="text-xl font-semibold text-[#df4040] mb-4">
                 Become a Driver
               </h3>
               <p className="text-gray-600 mb-6">
@@ -113,7 +126,7 @@ export default function Services() {
               >
                 <Link
                   href="/driver-register"
-                  className="border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
+                  className="border border-[#df4040] text-[#df4040] px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
                 >
                   Register as a Driver
                 </Link>
@@ -125,7 +138,7 @@ export default function Services() {
 
       {/* CTA Section */}
       <motion.section
-        className="py-16 bg-blue-600 text-white text-center"
+        className="py-16 bg-[#df4040] text-white text-center"
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
@@ -143,7 +156,7 @@ export default function Services() {
           >
             <Link
               href="/book"
-              className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
+              className="bg-white text-[#df4040] px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
             >
               Book an Ambulance
             </Link>

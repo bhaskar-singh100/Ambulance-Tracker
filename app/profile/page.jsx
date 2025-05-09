@@ -45,7 +45,7 @@ export default function Profile() {
     <div className="min-h-screen bg-gray-50 font-sans">
       {/* Hero Section */}
       <motion.section
-        className="pt-24 pb-12 bg-gradient-to-r from-blue-500 to-blue-700 text-white text-center"
+        className="pt-24 pb-12 bg-gradient-to-r from-[#df4040] to-[#df4040] text-white text-center"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -64,7 +64,7 @@ export default function Profile() {
           >
             <Link
               href="/book"
-              className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
+              className="bg-white text-[#df4040] px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
             >
               Book an Ambulance
             </Link>
@@ -120,7 +120,7 @@ export default function Profile() {
               >
                 <Link
                   href="/profile/edit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300"
+                  className="bg-[#df4040] text-white px-4 py-2 rounded-full hover:bg-[#df4040] transition duration-300"
                 >
                   Edit Profile
                 </Link>
@@ -142,7 +142,7 @@ export default function Profile() {
               >
                 <Link
                   href="/book"
-                  className="border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
+                  className="border border-[#df4040] text-[#df4040] px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
                 >
                   Book Now
                 </Link>
