@@ -1,28 +1,15 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-// import useAuthCheck from "@/hooks/useAuthCheck";
 import About from "../About/page";
 import Testimonials from "../Testimonials/page";
 import Features from "../Features/page";
-import { jwtDecode } from "jwt-decode";
+import { useAuth } from "@/contexts/AuthContext";
+
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  // const { isLoggedIn, userName } = useAuthCheck();
-  const token = sessionStorage.getItem("access_token");
-  const [role, setRole] = useState("");
-  useEffect(() => {
-    const token = sessionStorage.getItem("access_token");
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        setRole(decoded.role);
-      } catch (err) {
-        console.error("Invalid token:", err);
-      }
-    }
-  }, []);
+  const { isLoggedIn, role } = useAuth();
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -46,7 +33,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50 font-sans">
       {/* Hero Section */}
       <motion.section
-        className="pt-24 pb-12 bg-gradient-to-r from-blue-500 to-blue-700 text-white text-center"
+        className="pt-24 pb-12 bg-gradient-to-r from-[#df4040] to-[#df4040] text-white text-center"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -56,9 +43,11 @@ export default function Home() {
             Emergency Ambulance Services at Your Fingertips
           </h1>
           <p className="text-lg md:text-xl mb-8">
-            Book an ambulance instantly or join as a driver to save lives.
+            {role === "driver"
+              ? "Start your shift and help save lives today."
+              : "Book an ambulance instantly or join as a driver to save lives."}
           </p>
-          {(!token || role === "customer") && (
+          {(!isLoggedIn || role === "customer") && (
             <motion.div
               variants={buttonVariants}
               whileHover="hover"
@@ -66,13 +55,13 @@ export default function Home() {
             >
               <Link
                 href="/book"
-                className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
+                className="bg-white text-[#df4040] px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
               >
                 Book an Ambulance Now
               </Link>
             </motion.div>
           )}
-          {token && role === "driver" && (
+          {isLoggedIn && role === "driver" && (
             <motion.div
               variants={buttonVariants}
               whileHover="hover"
@@ -80,7 +69,7 @@ export default function Home() {
             >
               <Link
                 href="/driver-duty"
-                className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
+                className="bg-white text-[#df4040] px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
               >
                 Go to Duty
               </Link>
@@ -97,7 +86,7 @@ export default function Home() {
 
       {/* CTA Section */}
       <motion.section
-        className="py-16 bg-blue-600 text-white text-center"
+        className="py-16 bg-[#df4040] text-white text-center"
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
@@ -111,7 +100,7 @@ export default function Home() {
             Book an ambulance or join our driver network today.
           </p>
           <div className="flex justify-center space-x-4">
-            {(!token || role === "customer") && (
+            {(!isLoggedIn || role === "customer") && (
               <motion.div
                 variants={buttonVariants}
                 whileHover="hover"
@@ -119,13 +108,13 @@ export default function Home() {
               >
                 <Link
                   href="/book"
-                  className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
+                  className="bg-white text-[#df4040] px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
                 >
                   Book Now
                 </Link>
               </motion.div>
             )}
-            {(!token || role !== "customer") && (
+            {!isLoggedIn && (
               <motion.div
                 variants={buttonVariants}
                 whileHover="hover"
@@ -133,13 +122,13 @@ export default function Home() {
               >
                 <Link
                   href="/driver-register"
-                  className="border border-white text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-300"
+                  className="border border-white text-white px-6 py-3 rounded-full hover:bg-[#df4040] transition duration-300"
                 >
                   Become a Driver
                 </Link>
               </motion.div>
             )}
-            {token && role === "driver" && (
+            {isLoggedIn && role === "driver" && (
               <motion.div
                 variants={buttonVariants}
                 whileHover="hover"
@@ -147,7 +136,7 @@ export default function Home() {
               >
                 <Link
                   href="/driver-duty"
-                  className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
+                  className="bg-white text-[#df4040] px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
                 >
                   Go to Duty
                 </Link>

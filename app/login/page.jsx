@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import usePostQuery from "@/hooks/postQuery.hook";
 import { apiUrls } from "@/apis/urls";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const { postQuery } = usePostQuery();
   const router = useRouter();
+  const { login } = useAuth();
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -48,7 +50,7 @@ export default function Login() {
       postData: { email, password },
       onSuccess: (data) => {
         toast.success("Login successful!");
-        sessionStorage.setItem("access_token", data.token);
+        login(data.token);
         router.push("/");
         //window.location.reload();
 

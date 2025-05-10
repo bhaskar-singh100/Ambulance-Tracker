@@ -7,4 +7,5 @@ export const apiUrls = {
   driverSignup: "/driver/signup",
   driverLogin: "/driver/login",
   toggleDuty: "/driver/toggleDuty",
+  getAllDrivers: "/driver/getAll",
 };

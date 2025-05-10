@@ -128,7 +128,7 @@ export default function DriverRegister() {
                 name="name"
                 value={driverForm.name}
                 onChange={handleDriverFormChange}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#df4040] text-gray-900"
                 placeholder="Enter your full name"
               />
             </div>
@@ -145,7 +145,7 @@ export default function DriverRegister() {
                 name="email"
                 value={driverForm.email}
                 onChange={handleDriverFormChange}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#df4040] text-gray-900"
                 placeholder="Enter your email"
               />
             </div>
@@ -162,7 +162,7 @@ export default function DriverRegister() {
                 name="phoneNumber"
                 value={driverForm.phoneNumber}
                 onChange={handleDriverFormChange}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#df4040] text-gray-900"
                 placeholder="Enter your phone number"
               />
             </div>
@@ -180,7 +180,7 @@ export default function DriverRegister() {
                 name="password"
                 value={driverForm.password}
                 onChange={handleDriverFormChange}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#df4040] text-gray-900"
                 placeholder="Enter your password"
               />
             </div>
@@ -197,7 +197,7 @@ export default function DriverRegister() {
                 name="gender"
                 value={driverForm.gender}
                 onChange={handleDriverFormChange}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#df4040] text-gray-900"
               >
                 <option value="">Select gender</option>
                 <option value="male">Male</option>
@@ -218,7 +218,7 @@ export default function DriverRegister() {
                 name="dlNumber"
                 value={driverForm.dlNumber}
                 onChange={handleDriverFormChange}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#df4040] text-gray-900"
                 placeholder="Enter your license number"
               />
             </div>
@@ -234,7 +234,7 @@ export default function DriverRegister() {
                 name="vehicleType"
                 value={driverForm.vehicleType}
                 onChange={handleDriverFormChange}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#df4040] text-gray-900"
               >
                 <option value="">Select vehicle type</option>
                 <option value="Standard Ambulance">Standard Ambulance</option>
@@ -257,7 +257,7 @@ export default function DriverRegister() {
                 name="vehicleNumber"
                 value={driverForm.vehicleNumber}
                 onChange={handleDriverFormChange}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#df4040] text-gray-900"
                 placeholder="Enter vehicle registration number"
               />
             </div>
@@ -268,7 +268,7 @@ export default function DriverRegister() {
             >
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300"
+                className="w-full bg-[#df4040] text-white px-4 py-2 rounded-full hover:bg-[#df4040] transition duration-300"
               >
                 Submit Application
               </button>
@@ -276,7 +276,7 @@ export default function DriverRegister() {
           </form>
           <p className="text-center text-gray-600 mt-4">
             Already registered?{" "}
-            <Link href="/login" className="text-blue-600 hover:underline">
+            <Link href="/login" className="text-[#df4040] hover:underline">
               Login
             </Link>
           </p>

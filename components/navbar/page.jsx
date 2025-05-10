@@ -2,19 +2,17 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import useAuthCheck from "@/hooks/useAuthCheck";
+import { useAuth } from "@/contexts/AuthContext";
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { isLoggedIn, userName } = useAuthCheck({
-    redirectOnUnauthenticated: false,
-  });
+  // const { isLoggedIn, userName } = useAuthCheck({
+  //   redirectOnUnauthenticated: false,
+  // });
+  const { isLoggedIn, role, userName, logout } = useAuth();
 
-  const navItems = [
-    { name: "Services", href: "/services" },
-    { name: "About", href: "/about" },
-  ];
+  const navItems = [{ name: "Services", href: "/services" }];
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -36,7 +34,8 @@ function Navbar() {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("access_token");
+    logout();
+    // sessionStorage.removeItem("access_token");
     setIsMenuOpen(false);
     setIsModalOpen(false);
     window.location.href = "/login";
@@ -58,12 +57,12 @@ function Navbar() {
             <div className="flex items-center">
               <Link href="/" className="flex items-center">
                 <img
-                  src="/ambulance-logo.png"
+                  src="/navbar/logo.png"
                   alt="Ambulance Tracker"
                   className="h-10 w-10"
                 />
-                <span className="ml-2 text-xl font-bold text-blue-600">
-                  Ambulance Tracker
+                <span className="ml-2 text-xl font-bold text-[#df4040]">
+                  MediTrackerX
                 </span>
               </Link>
             </div>
@@ -72,23 +71,42 @@ function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-gray-700 hover:text-blue-600 transition duration-300"
+                  className="text-gray-700 hover:text-[#df4040] transition duration-300"
                 >
                   {item.name}
                 </Link>
               ))}
-              <motion.div
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <Link
-                  href="/book"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300"
+
+              {(!isLoggedIn || role === "customer") && (
+                <motion.div
+                  variants={buttonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
                 >
-                  Book Now
-                </Link>
-              </motion.div>
+                  <Link
+                    href="/book"
+                    className="bg-[#df4040] text-white px-4 py-2 rounded-full hover:bg-[#df4040] transition duration-300"
+                  >
+                    Book Now
+                  </Link>
+                </motion.div>
+              )}
+
+              {isLoggedIn && role === "driver" && (
+                <motion.div
+                  variants={buttonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  <Link
+                    href="/driver-duty"
+                    className="bg-[#df4040] text-white px-4 py-2 rounded-full hover:bg-[#df4040] transition duration-300"
+                  >
+                    Go to Duty
+                  </Link>
+                </motion.div>
+              )}
+
               {isLoggedIn ? (
                 <div className="relative flex items-center">
                   <div
@@ -114,7 +132,7 @@ function Navbar() {
                       <div className="py-2">
                         <Link
                           href="/profile"
-                          className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-300"
+                          className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-[#df4040] transition duration-300"
                           onClick={closeModal}
                         >
                           Profile
@@ -137,7 +155,7 @@ function Navbar() {
                 >
                   <Link
                     href="/login"
-                    className="border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
+                    className="border border-[#df4040] text-[#df4040] px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
                   >
                     Login
                   </Link>
@@ -182,7 +200,7 @@ function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="block text-gray-700 hover:text-blue-600 transition duration-300"
+                  className="block text-gray-700 hover:text-[#df4040] transition duration-300"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
@@ -190,7 +208,7 @@ function Navbar() {
               ))}
               <Link
                 href="/book"
-                className="block bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300"
+                className="block bg-[#df4040] text-white px-4 py-2 rounded-full hover:bg-[#df4040] transition duration-300"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Book Now
@@ -199,7 +217,7 @@ function Navbar() {
                 <>
                   <Link
                     href="/profile"
-                    className="block border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
+                    className="block border border-[#df4040] text-[#df4040] px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {userName ? `${userName}'s Profile` : "Profile"}
@@ -214,7 +232,7 @@ function Navbar() {
               ) : (
                 <Link
                   href="/login"
-                  className="block border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
+                  className="block border border-[#df4040] text-[#df4040] px-4 py-2 rounded-full hover:bg-blue-50 transition duration-300"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Login
