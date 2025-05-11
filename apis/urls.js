@@ -1,4 +1,6 @@
-export const apiBaseUrl = "http://localhost:4000/api/v1";
+//export const apiBaseUrl = "https://ambulance-tracker-backend.vercel.app/api/v1";
+export const apiBaseUrl =
+  "https://ambulance-tracker-backend.onrender.com/api/v1";
 
 export const apiUrls = {
   authentication: "/verify",

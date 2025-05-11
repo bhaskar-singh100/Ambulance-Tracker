@@ -1,13 +1,14 @@
 "use client";
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import socket from "@/lib/socket";
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function TrackDriver() {
+// Client component that uses search params
+function TrackDriverContent() {
   const mapRef = useRef(null);
   const driverMarkerRef = useRef(null);
   const [mapData, setMapData] = useState(null);
@@ -17,21 +18,23 @@ export default function TrackDriver() {
   const [isMounted, setIsMounted] = useState(false);
   const [locationQueue, setLocationQueue] = useState([]);
   const [hasReached, setHasReached] = useState(false);
-  const searchParams = useSearchParams();
 
+  const searchParams = useSearchParams();
   const bookingId = searchParams.get("bookingId");
   const driverName = searchParams.get("driverName");
   const lat = parseFloat(searchParams.get("lat"));
   const lng = parseFloat(searchParams.get("lng"));
+
   const { isLoggedIn, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading && !isLoggedIn) {
-      toast.error("Please login to book an ambulance");
+      toast.error("Please login to track your driver");
       router.push("/login");
     }
   }, [isLoggedIn, loading, router]);
+
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -40,6 +43,7 @@ export default function TrackDriver() {
       transition: { duration: 0.6, ease: "easeOut" },
     },
   };
+
   const buttonVariants = { hover: { scale: 1.05 }, tap: { scale: 0.95 } };
 
   const loadScript = (url, retries = 5, delay = 1000) => {
@@ -162,24 +166,46 @@ export default function TrackDriver() {
       socket.emit("joinBooking", { bookingId });
     }
 
+    // Modify the handleDriverLocationUpdate function
     const handleDriverLocationUpdate = ({ coordinates }) => {
       console.log("Driver location update received:", coordinates);
       if (!hasReached) {
         if (mapData && mapData.map) {
-          setDriverInfo((prev) => ({ ...prev, coordinates }));
+          // Force update driver info
+          const updatedDriverInfo = {
+            ...(driverInfo || { name: driverName || "Driver" }),
+            coordinates,
+          };
+          setDriverInfo(updatedDriverInfo);
+
+          // MARKER FIX: Create or update marker with improved logic
           if (driverMarkerRef.current) {
+            console.log("Updating existing marker position:", coordinates);
             driverMarkerRef.current.setPosition(coordinates);
-          } else if (driverInfo) {
+          } else {
+            console.log("Creating new driver marker:", coordinates);
             const newMarker = new window.google.maps.Marker({
               position: coordinates,
               map: mapData.map,
-              title: driverInfo.name || "Driver",
+              title: updatedDriverInfo.name,
+              // Use a more reliable icon or fallback to default
               icon: {
-                url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+                url: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+                scaledSize: new window.google.maps.Size(40, 40),
               },
+              animation: window.google.maps.Animation.DROP,
             });
             driverMarkerRef.current = newMarker;
+
+            // Add bounce animation to make it more visible initially
+            setTimeout(() => {
+              if (driverMarkerRef.current) {
+                driverMarkerRef.current.setAnimation(null);
+              }
+            }, 3000);
           }
+
+          // Center map on marker
           mapData.map.panTo(coordinates);
         } else {
           setLocationQueue((prev) => [...prev, { coordinates }]);
@@ -357,7 +383,7 @@ export default function TrackDriver() {
                 <motion.button
                   onClick={handleRetry}
                   className="mt-4 bg-[#df4040] text-white px-4 py-2 rounded-lg hover:bg-[#df4040] transition duration-300"
-                  variants={intronVariants}
+                  variants={buttonVariants}
                   whileHover="hover"
                   whileTap="tap"
                 >
@@ -370,5 +396,25 @@ export default function TrackDriver() {
       </motion.section>
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
+  );
+}
+
+// Main component that uses Suspense
+export default function TrackDriver() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="mt-4 text-gray-600">
+              Loading tracking information...
+            </p>
+          </div>
+        </div>
+      }
+    >
+      <TrackDriverContent />
+    </Suspense>
   );
 }

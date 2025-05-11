@@ -54,8 +54,11 @@ export default function DriverDuty() {
   }, []);
 
   useEffect(() => {
-    socketRef.current = io("http://localhost:4000", {
-      transports: ["websocket"],
+    socketRef.current = io("https://ambulance-tracker-backend.onrender.com", {
+      transports: ["websocket", "polling"], // Allow polling fallback
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      timeout: 20000,
     });
     if (id) {
       socketRef.current.emit("registerDriver", id);
